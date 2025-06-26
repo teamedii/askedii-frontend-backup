@@ -4,7 +4,7 @@ on:
     branches:
       - main
 env:
-  AWS_REGION: ap-south-1                   # Mumbai region
+  AWS_REGION: ap-south-1                   # Mumbai regon
   ECR_REPOSITORY: edii   # Example backend repository name
 jobs:
   build-and-deploy:
