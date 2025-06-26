@@ -6,51 +6,58 @@ on:
       - main
 
 env:
-  AWS_REGION: ap-south-1                   # Mumbai region
-  ECR_REPOSITORY: edii   # Example backend repository name
+  AWS_REGION: ap-south-1
+  ECR_REPOSITORY: edii
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest          # Fixed: changed from ubuntu:latest to ubuntu-latest
-    
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+        with:
+          install: true
+          use: true
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
-        
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        
+
       - name: Build, tag, and push ARM64 image to Amazon ECR
         id: build-image
         timeout-minutes: 15
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
-          echo "Building and pushing image..."
-          
-          # Build and push ARM64 image with aflatest tag
+          echo "🏗️ Building for platform: linux/arm64"
+          echo "📦 Target Image: $ECR_REGISTRY/$ECR_REPOSITORY:aflatest"
+
           docker buildx build \
-            --platform linux/arm64 \
-            --tag $ECR_REGISTRY/$ECR_REPOSITORY:aflatest \
+            --platform=linux/arm64 \
+            --tag=$ECR_REGISTRY/$ECR_REPOSITORY:aflatest \
             --push \
-            .
-            
-          echo "Build completed!"
-          
-          # Set output for the image URI
+            . || { echo "🚨 Docker build failed"; exit 1; }
+
+          echo "✅ Build completed and pushed!"
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:aflatest" >> $GITHUB_OUTPUT
-        
+
       - name: Image deployment info
         run: |
           echo "🚀 Image pushed successfully!"
