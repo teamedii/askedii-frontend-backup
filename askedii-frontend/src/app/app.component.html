@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EDII</title>
+</head>
+
+<body>
+    <div class="searchfield bg-hed-six">
+        <div class="container" style="padding-top: 20px; padding-bottom: 20px;">
+            <div class="row text-center margin-bottom-20">
+                <h1 class="white">  Edii</h1>
+                <!-- <span class="nested"> Type Your Questions Here </span> -->
+            </div>
+            <br>
+            <div class="row search-row">
+                <input type="text" class="search" placeholder="Ask Me Anything?"
+                    [(ngModel)]="question">
+                <a class="buttonsearch btn btn-info btn-lg"
+                    (click)="askQuestionStp1(question)">Search</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container featured-area-default padding-30">
+        <div class="row" *ngIf="showAdditionalInfo">
+            <div class="col-md-8 padding-20">
+                <div class="row margin-bottom-30">
+                    <div class="col-md-12">
+                        <div class="row">
+                            <div class="featured-box">
+                                <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "timer" [fullScreen] = "false"></ngx-spinner>
+                                <!-- <p class="para">
+                                    <span class="answer">Answer:</span> {{askEdiiRes.response}}
+                                </p> -->
+                                <p class="para" [innerHTML]="replaceNewlines(askEdiiRes.response)"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4  padding-20">
+                <div class="support-container">
+                    <ngx-spinner bdColor = "rgba(0, 0, 0, 0.8)" size = "medium" color = "#fff" type = "timer" [fullScreen] = "false"></ngx-spinner>
+                    <h2 class="support-heading">Last Updated</h2>
+                    {{askEdiiRes.lastUpdatedOn}}
+                </div>
+            </div>
+        </div>
+
+        <div class="row margin-top-20">
+            <div class="col-md-6" >
+                <div class="fb-heading-small">
+                    Popular Questions
+                </div>
+                <hr class="style-three">
+                <div class="fat-content-small padding-left-10" *ngIf="showHotQuestion">
+                    <ul>
+                        <li *ngFor="let questionHot of allHotQuestion">
+                            <a (click)="askQuestionStp1(questionHot.question)">
+                                <i class="fas fa-file-alt" ></i> {{questionHot.question}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-6" >
+                <div class="fb-heading-small">
+                    Latest Questions
+                </div>
+                <hr class="style-three">
+                <div class="fat-content-small padding-left-10" *ngIf="showLatestQuestion">
+                    <ul>
+                        <li *ngFor="let questionLatest of allLatestQuestion">
+                            <a (click)="askQuestionStp1(questionLatest.question)">
+                                <i class="fas fa-file-alt" ></i> {{questionLatest.question}}</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="container-fluid featured-area-grey padding-30">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="fb-heading">
+                        About Us
+                    </div>
+                    <div class="fb-content">
+                        <p>
+                            Ask Edii aims to serve as a freely available encyclopedia for all fields of knowledge that
+                            will be of use to students and readers. Get brief or elaborated answers through Ask Edii
+                            regarding any subject or field. Type in your question and click on search, make sure to
+                            avoid spelling mistakes, you'll get the answer instantly. You can write Essays and find the
+                            most difficult of formulas
+                            here just by asking!
+                        </p>
+                        <p>
+                            Students can quickly access the most asked/popular questions as it is visible above, and
+                            also get an insight of the latest and trending topics which need a quick read.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container-fluid footer-copyright marg30">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-left">
+                    Copyright © 2022 EDII
+                </div>
+                <div class="col-md-6 text-right">
+                    <a href="https://www.facebook.com/TeamEdii/" target="_blank">
+                        <i class="fab fa-facebook-f"></i></a> &nbsp;
+                    <a href="https://twitter.com/TeamEdii" target="_blank"> <i class="fab fa-twitter"></i></a> &nbsp;
+                    <a href="https://www.linkedin.com/company/teamedii/" target="_blank"> <i
+                            class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
