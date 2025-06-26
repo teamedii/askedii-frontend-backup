@@ -35,17 +35,25 @@ jobs:
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          TAG: ${{ github.sha }}  # Added: Define TAG variable using commit SHA
+          TAG: ${{ github.sha }}
         run: |
-          # Build and push ARM64 image with latest tag
+          echo "Starting Docker build..."
+          echo "Registry: $ECR_REGISTRY"
+          echo "Repository: $ECR_REPOSITORY" 
+          echo "Tag: $TAG"
+          
+          # Build and push ARM64 image
           docker buildx build \
             --platform linux/arm64 \
-            --tag $ECR_REGISTRY/$ECR_REPOSITORY:aflatest \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$TAG \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
             --push \
             .
             
+          echo "Build completed successfully!"
+          
           # Set output for the image URI
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:aflatest" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$TAG" >> $GITHUB_OUTPUT
         
       - name: Image deployment info
         run: |
@@ -54,5 +62,6 @@ jobs:
           echo "🏗️  Architecture: ARM64 optimized"
           echo "🌍 Region: ${{ env.AWS_REGION }}"
           echo "📂 Repository: ${{ env.ECR_REPOSITORY }}"
+          echo "🏷️  Tag: ${{ github.sha }}"
           echo ""
           echo "🎯 Your image is now available in ECR as: ${{ steps.build-image.outputs.image }}"
