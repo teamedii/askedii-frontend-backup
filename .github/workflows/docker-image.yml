@@ -3,15 +3,12 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 env:
   AWS_REGION: ap-south-1                   # Mumbai region
   ECR_REPOSITORY: edii   # Example backend repository name
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     
     steps:
       - name: Checkout code
@@ -39,12 +36,12 @@ jobs:
           # Build and push ARM64 image with latest tag
           docker buildx build \
             --platform linux/arm64 \
-            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$TAG \
             --push \
             .
           
           # Set output for the image URI
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$TAG" >> $GITHUB_OUTPUT
       
       - name: Image deployment info
         run: |
