@@ -33,27 +33,23 @@ jobs:
         
       - name: Build, tag, and push ARM64 image to Amazon ECR
         id: build-image
+        timeout-minutes: 15
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          TAG: ${{ github.sha }}
         run: |
-          echo "Starting Docker build..."
-          echo "Registry: $ECR_REGISTRY"
-          echo "Repository: $ECR_REPOSITORY" 
-          echo "Tag: $TAG"
+          echo "Building and pushing image..."
           
-          # Build and push ARM64 image
+          # Build and push ARM64 image with aflatest tag
           docker buildx build \
             --platform linux/arm64 \
-            --tag $ECR_REGISTRY/$ECR_REPOSITORY:$TAG \
-            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:aflatest \
             --push \
             .
             
-          echo "Build completed successfully!"
+          echo "Build completed!"
           
           # Set output for the image URI
-          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$TAG" >> $GITHUB_OUTPUT
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:aflatest" >> $GITHUB_OUTPUT
         
       - name: Image deployment info
         run: |
@@ -62,6 +58,4 @@ jobs:
           echo "🏗️  Architecture: ARM64 optimized"
           echo "🌍 Region: ${{ env.AWS_REGION }}"
           echo "📂 Repository: ${{ env.ECR_REPOSITORY }}"
-          echo "🏷️  Tag: ${{ github.sha }}"
-          echo ""
-          echo "🎯 Your image is now available in ECR as: ${{ steps.build-image.outputs.image }}"
+          echo "🏷️  Tag: aflatest"
