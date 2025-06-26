@@ -12,6 +12,7 @@ env:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
       packages: write
@@ -42,21 +43,39 @@ jobs:
 
       - name: Build, tag, and push ARM64 image to Amazon ECR
         id: build-image
-        timeout-minutes: 15
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
+          set -x
+
           echo "🏗️ Building for platform: linux/arm64"
           echo "📦 Target Image: $ECR_REGISTRY/$ECR_REPOSITORY:aflatest"
 
+          # Ensure a builder exists and is used
+          docker buildx inspect || docker buildx create --use
+
+          # Build and push
           docker buildx build \
             --platform=linux/arm64 \
             --tag=$ECR_REGISTRY/$ECR_REPOSITORY:aflatest \
             --push \
+            --progress=plain \
             . || { echo "🚨 Docker build failed"; exit 1; }
 
           echo "✅ Build completed and pushed!"
+
+          # Write output safely with newline
+          echo '' >> $GITHUB_OUTPUT
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:aflatest" >> $GITHUB_OUTPUT
+
+          # Clean up lingering processes
+          pkill -f qemu-aarch64 || true
+          docker buildx stop || true
+          docker buildx rm $(docker buildx ls | grep -v NAME | awk '{print $1}') || true
+
+      - name: Check running processes (for debugging)
+        if: always()
+        run: ps aux | grep -i 'qemu\|buildx' || true
 
       - name: Image deployment info
         run: |
