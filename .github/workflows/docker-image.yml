@@ -1,0 +1,57 @@
+name: askedii-frontend
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+env:
+  AWS_REGION: ap-south-1                   # Mumbai region
+  ECR_REPOSITORY: edii   # Example backend repository name
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      
+      - name: Build, tag, and push ARM64 image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          # Build and push ARM64 image with latest tag
+          docker buildx build \
+            --platform linux/arm64 \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
+            --push \
+            .
+          
+          # Set output for the image URI
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:latest" >> $GITHUB_OUTPUT
+      
+      - name: Image deployment info
+        run: |
+          echo "🚀 Image pushed successfully!"
+          echo "📦 Image URI: ${{ steps.build-image.outputs.image }}"
+          echo "🏗️  Architecture: ARM64 optimized"
+          echo "🌍 Region: ${{ env.AWS_REGION }}"
+          echo "📂 Repository: ${{ env.ECR_REPOSITORY }}"
+          echo ""
+          echo "🎯 Your image is now available in ECR as: ${{ steps.build-image.outputs.image }}"
